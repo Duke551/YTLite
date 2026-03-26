@@ -90,22 +90,23 @@ jobs:
         with:
           path: YTLite-source
 
+      - name: Clone YouTubeHeader (sibling for YTLite build)
+        run: git clone --quiet --depth=1 https://github.com/PoomSmart/YouTubeHeader.git
+
+      - name: Clone protobuf (sibling for YTLite build)
+        run: git clone --quiet --depth=1 --filter=tree:0 --sparse https://github.com/protocolbuffers/protobuf.git && cd protobuf && git sparse-checkout set objectivec
+
       - name: Build YTLite from source
         run: |
           cd YTLite-source && make clean package DEBUG=0 FINALPACKAGE=1
           mv packages/*.deb ../ytplus.deb
           echo "Built YTLite from source (includes spinner fix)"
 
-      - name: Clone YouTubeHeader
+      - name: Setup YouTubeHeader in Theos includes
         if: ${{ inputs.enable_youpip || inputs.enable_ytuhd || inputs.enable_yq || inputs.enable_ryd || inputs.enable_ytabc || inputs.enable_demc }}
         run: |
-          if [ -d "$THEOS/include/YouTubeHeader" ]; then
-            cd $THEOS/include/YouTubeHeader && git pull
-          else
-            cd $THEOS/include && git clone --quiet --depth=1 https://github.com/PoomSmart/YouTubeHeader.git
-          fi
+          cp -r YouTubeHeader $THEOS/include/YouTubeHeader
           if [ "${{ inputs.enable_demc }}" = "true" ]; then
-            rm -rf "$THEOS/include/YTHeaders"
             cp -r "$THEOS/include/YouTubeHeader" "$THEOS/include/YTHeaders"
           fi
 
