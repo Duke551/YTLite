@@ -72,12 +72,14 @@ jobs:
           git commit -m "Bump YTLite to v${LATEST}"
           git push origin "$branch"
 
+          PR_BODY="New YTLite release detected: **v${CURRENT}** → **v${LATEST}**
+
+          [Release notes](https://github.com/dayanch96/YTLite/releases/tag/v${LATEST})
+
+          After merging, trigger a build from Actions → Create YouTube Plus app."
+
           gh pr create \
             --title "Bump YTLite to v${LATEST}" \
-            --body "New YTLite release detected: **v${CURRENT}** → **v${LATEST}**
-
-[Release notes](https://github.com/dayanch96/YTLite/releases/tag/v${LATEST})
-
-After merging, trigger a build from Actions → Create YouTube Plus app." \
+            --body "$PR_BODY" \
             --base main \
             --head "$branch"
