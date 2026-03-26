@@ -46,7 +46,7 @@ on:
         type: string
 
       tweak_version:
-        description: "The version of the tweak to use. Enter the version manually from dayanch96/YTLite/releases or leave default"
+        description: "Label for the output IPA (e.g. 5.2b4). YTLite is built from source with spinner fix included."
         default: "5.2b4"
         required: true
         type: string
@@ -83,7 +83,6 @@ jobs:
       enable_ryd: ${{ inputs.enable_ryd }}
       enable_ytabc: ${{ inputs.enable_ytabc }}
       enable_demc: ${{ inputs.enable_demc }}
-      tweak_version: ${{ inputs.tweak_version }}
 
   package:
     name: Package IPA
