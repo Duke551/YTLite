@@ -1,0 +1,83 @@
+name: Check for YTLite Updates
+
+on:
+  schedule:
+    - cron: '0 9 * * 1'  # Every Monday at 9am UTC
+  workflow_dispatch:       # Manual trigger
+
+jobs:
+  check-updates:
+    name: Check for new YTLite release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Check latest YTLite release
+        id: check
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # Get current version from workflow default
+          current=$(grep -A2 'tweak_version:' .github/workflows/main.yml | grep 'default:' | head -1 | sed 's/.*default: *"\(.*\)"/\1/')
+          echo "Current version: $current"
+
+          # Get latest release from dayanch96/YTLite
+          latest=$(gh api repos/dayanch96/YTLite/releases/latest --jq '.tag_name' 2>/dev/null | sed 's/^v//')
+          if [ -z "$latest" ]; then
+            # No "latest" (all pre-releases?), get most recent
+            latest=$(gh api repos/dayanch96/YTLite/releases --jq '.[0].tag_name' 2>/dev/null | sed 's/^v//')
+          fi
+          echo "Latest version: $latest"
+
+          if [ "$current" = "$latest" ]; then
+            echo "Already up to date"
+            echo "updated=false" >> $GITHUB_OUTPUT
+          else
+            # Verify the deb asset actually exists
+            deb_url="https://github.com/dayanch96/YTLite/releases/download/v${latest}/com.dvntm.ytlite_${latest}_iphoneos-arm.deb"
+            status=$(curl -sL -o /dev/null -w "%{http_code}" "$deb_url")
+            if [ "$status" = "200" ] || [ "$status" = "302" ]; then
+              echo "New version available: $latest (deb verified)"
+              echo "updated=true" >> $GITHUB_OUTPUT
+              echo "latest=$latest" >> $GITHUB_OUTPUT
+              echo "current=$current" >> $GITHUB_OUTPUT
+            else
+              echo "New version $latest found but deb not available (HTTP $status)"
+              echo "updated=false" >> $GITHUB_OUTPUT
+            fi
+          fi
+
+      - name: Update version and create PR
+        if: steps.check.outputs.updated == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          LATEST: ${{ steps.check.outputs.latest }}
+          CURRENT: ${{ steps.check.outputs.current }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          branch="update-ytlite-v${LATEST}"
+          git checkout -b "$branch"
+
+          # Update the default version in main.yml
+          sed -i "s/default: \"${CURRENT}\"/default: \"${LATEST}\"/" .github/workflows/main.yml
+
+          git add .github/workflows/main.yml
+          git commit -m "Bump YTLite to v${LATEST}"
+          git push origin "$branch"
+
+          gh pr create \
+            --title "Bump YTLite to v${LATEST}" \
+            --body "New YTLite release detected: **v${CURRENT}** → **v${LATEST}**
+
+[Release notes](https://github.com/dayanch96/YTLite/releases/tag/v${LATEST})
+
+After merging, trigger a build from Actions → Create YouTube Plus app." \
+            --base main \
+            --head "$branch"
