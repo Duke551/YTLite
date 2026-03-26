@@ -95,7 +95,7 @@ jobs:
 
       - name: Clone protobuf (sibling for YTLite build)
         run: |
-          git clone --quiet --depth=1 --filter=blob:none --sparse https://github.com/protocolbuffers/protobuf.git
+          git clone --quiet --depth=1 --branch v4.25.3 --filter=blob:none --sparse https://github.com/protocolbuffers/protobuf.git
           cd protobuf
           git sparse-checkout init --cone
           git sparse-checkout set objectivec
