@@ -1,4 +1,5 @@
 #import "YTLite.h"
+#import <objc/message.h>
 
 static UIImage *YTImageNamed(NSString *imageName) {
     return [UIImage imageNamed:imageName inBundle:[NSBundle mainBundle] compatibleWithTraitCollection:nil];
@@ -1404,20 +1405,20 @@ static NSURL *newCoverURL(NSURL *originalURL) {
 
     // State 2 = Playing
     if (state == 2) {
-        __weak typeof(self) weakSelf = self;
+        __weak id weakSelf = self;
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-            __strong typeof(weakSelf) strongSelf = weakSelf;
+            id strongSelf = weakSelf;
             if (!strongSelf) return;
 
             // Re-check that we're still in playing state before clearing spinners
             NSInteger currentState = 0;
             if ([strongSelf respondsToSelector:@selector(playerState)]) {
-                currentState = [(id)strongSelf playerState];
+                currentState = ((NSInteger(*)(id, SEL))objc_msgSend)(strongSelf, @selector(playerState));
             }
             if (currentState != 2) return;
 
             // Walk up the view hierarchy to find YTPlayerView
-            UIView *view = strongSelf.view;
+            UIView *view = [strongSelf valueForKey:@"view"];
             while (view && ![view isKindOfClass:NSClassFromString(@"YTPlayerView")]) {
                 view = view.superview;
             }
