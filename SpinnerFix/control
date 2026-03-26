@@ -1,0 +1,7 @@
+Package: com.duke551.spinnerfix
+Name: SpinnerFix
+Version: 1.0.0
+Architecture: iphoneos-arm
+Description: Fixes stuck loading spinner overlay on iPad YouTube
+Author: Duke551
+Depends: mobilesubstrate
