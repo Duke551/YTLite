@@ -112,16 +112,18 @@ jobs:
             exit 1
           fi
 
-      - name: Install cyan
-        run: pipx install --force https://github.com/asdfzxcvbn/pyzule-rw/archive/main.zip
+      - name: Install cyan (dev branch with designated requirement fix)
+        run: pipx install --force https://github.com/asdfzxcvbn/pyzule-rw/archive/dev.zip
 
 
       - name: Inject tweaks into IPA
         run: |
           tweaks="ytplus.deb OpenYoutubeSafariExtension.appex"
           for f in *.deb; do
+            [ "$f" = "ytplus.deb" ] && continue
             [ -f "$f" ] && tweaks="$tweaks $f"
           done
+          echo "Injecting: $tweaks"
           cyan -i youtube.ipa -o YouTubePlus_${{ github.event.inputs.tweak_version }}.ipa -uwef $tweaks -n "${{ github.event.inputs.display_name }}" -b ${{ github.event.inputs.bundle_id }}
 
       - name: Upload to GitHub Releases

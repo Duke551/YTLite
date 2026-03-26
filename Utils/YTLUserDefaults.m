@@ -26,7 +26,7 @@ static NSString *const kDefaultsSuiteName = @"com.dvntm.ytlite";
         @"backgroundPlayback": @YES,
         @"removeUploads": @YES,
         @"speedIndex": @1,
-        @"autoSpeedIndex": @3,
+        @"autoSpeedIndex": @7,
         @"wiFiQualityIndex": @0,
         @"cellQualityIndex": @0,
         @"pivotIndex": @0
