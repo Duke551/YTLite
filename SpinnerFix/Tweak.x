@@ -6,6 +6,8 @@
  * state change and clears stuck spinners after playback is confirmed.
  */
 
+#import <UIKit/UIKit.h>
+
 @interface YTPlayerView : UIView
 @property (nonatomic, readonly) UIView *overlayView;
 @end
