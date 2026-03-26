@@ -12,6 +12,10 @@
 @property (nonatomic, readonly) UIView *overlayView;
 @end
 
+@interface YTContentVideoPlayerOverlayViewController : UIViewController
+- (NSInteger)playerState;
+@end
+
 static void hideStuckSpinnersInView(UIView *view) {
     for (UIView *subview in view.subviews) {
         if ([subview isKindOfClass:NSClassFromString(@"MDCActivityIndicator")] ||
@@ -38,11 +42,10 @@ static void hideStuckSpinnersInView(UIView *view) {
             __strong typeof(weakSelf) strongSelf = weakSelf;
             if (!strongSelf) return;
 
-            NSInteger currentState = 0;
             if ([strongSelf respondsToSelector:@selector(playerState)]) {
-                currentState = [(id)strongSelf playerState];
+                NSInteger currentState = [strongSelf playerState];
+                if (currentState != 2) return;
             }
-            if (currentState != 2) return;
 
             UIView *view = strongSelf.view;
             while (view && ![view isKindOfClass:NSClassFromString(@"YTPlayerView")]) {
